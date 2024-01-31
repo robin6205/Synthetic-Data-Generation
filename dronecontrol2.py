@@ -1,25 +1,28 @@
 import airsim
 import time
-import drone
+from drone import Drone
 import os
 from extractjson import get_commands_list
+import asyncio
 
 #connect to server with drone controls
-client = airsim.MultirotorClient()
-client.confirmConnection()
-client.enableApiControl(True)
-client.armDisarm(True)
-drone_controls = airsim.MultirotorClient()
+Drone.client = airsim.MultirotorClient()
+Drone.client.enableApiControl(True, "Drone1")
+Drone.client.enableApiControl(True, "Drone2")
+Drone.client.armDisarm(True, "Drone1")
+Drone.client.armDisarm(True, "Drone2")
+f1 = client.takeoffAsync(vehicle_name="Drone1")
+f2 = client.takeoffAsync(vehicle_name="Drone2")
+f1.join()
+f2.join()
 command_file = "C:/Users/aleca/Desktop/test2.json"
 commands = get_commands_list(command_file)
 print(commands)
-
-
-drone_one = drone.Drone(client, 0, 10, 0)
-
-for step in commands["Drone1"]:
-    time.sleep(step["delay"])
-    drone_one.move(step["x"], step["y"], step["z"], step["velocity"])
+drones = ["Drone1","Drone2"]
+print("a")
+for drone in drones:
+    for command in commands[drone]:
+        client.moveToPositionAsync(command["x"], command["z"], -command["y"], 5, vehicle_name=drone)
 
 
 
