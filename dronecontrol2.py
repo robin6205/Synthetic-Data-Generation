@@ -7,9 +7,9 @@ import asyncio
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
-async def get_user_command(session):
+async def get_user_command(session,prompt):
     with patch_stdout():
-        return await session.prompt_async("Enter command (move, file, quit): ")
+        return await session.prompt_async(prompt)
 
 
 
@@ -19,6 +19,10 @@ commands = get_commands_list(command_file)
 print(commands)
 drone1 = Drone(0, 10, 0, "Drone1")
 drone2 = Drone(0, 10, 0, "Drone2")
+drone3 = Drone(0, 10, 0, "Drone3")
+drone4 = Drone(0, 10, 0, "Drone4")
+drone5 = Drone(0, 10, 0, "Drone5")
+
 
 async def run_commands(drone, commands):
     for step in commands[drone.name]:
@@ -26,12 +30,12 @@ async def run_commands(drone, commands):
 
 
 async def main():
-    drone_tasks = {drone1.name: None, drone2.name: None}
+    drone_tasks = {drone1.name: None, drone2.name: None,drone3.name: None, drone4.name: None,drone5.name: None}
+    drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
+    session = PromptSession()
 
     while True:
-        session = PromptSession()
-
-        user_command = await get_user_command(session)
+        user_command = await get_user_command(session,"Enter command (move, file, quit): ")
 
         if user_command == "quit":
             break
@@ -39,20 +43,25 @@ async def main():
         if user_command == "file":
             drone_tasks[drone1.name] = asyncio.create_task(run_commands(drone1, commands))
             drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
-            await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name])
+            drone_tasks[drone3.name] = asyncio.create_task(run_commands(drone3, commands))
+            drone_tasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
+            drone_tasks[drone5.name] = asyncio.create_task(run_commands(drone5, commands))
+            await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name],drone_tasks[drone3.name],
+                                 drone_tasks[drone4.name],drone_tasks[drone5.name])
         if user_command == "move":
-            user_input = input("Select a drone (1 or 2): ")
-            selected_drone = drone1 if user_input == "1" else drone2
+            user_input = await get_user_command(session,"Select a drone (1 or 2 or 3 or 4 or 5): ")
+            drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
+            selected_drone = drone_dict[user_input]
             if drone_tasks[selected_drone.name] and not drone_tasks[selected_drone.name].done():
                 print(f"{selected_drone.name} is still executing a task. Please wait for it to finish.")
                 continue
-            x = float(input("Enter desired x-coordinate: "))
-            y = float(input("Enter desired y-coordinate: "))
-            z = float(input("Enter desired z-coordinate: "))
-            velocity = float(input("Enter desired velocity: "))
-            delay = float(input("Enter desired delay: "))
+            x = float(await get_user_command(session,"Enter desired x-coordinate: "))
+            y = float(await get_user_command(session,"Enter desired y-coordinate: "))
+            z = float(await get_user_command(session,"Enter desired z-coordinate: "))
+            velocity = float(await get_user_command(session,"Enter desired velocity: "))
+            delay = float(await get_user_command(session,"Enter desired delay: "))
             drone_tasks[selected_drone.name] = asyncio.create_task(selected_drone.move(x, y, z, velocity, delay))
-        await asyncio.sleep(0.1)  # Give time for other tasks to run
+        await asyncio.sleep(0)  # Give time for other tasks to run
 
 
 
