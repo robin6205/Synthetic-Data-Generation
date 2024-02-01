@@ -22,4 +22,3 @@ def get_commands_list(data):
 filepath = "C:/Users/aleca/Desktop/test.json"
 
 commands = get_commands_list(filepath)
-print(commands)
