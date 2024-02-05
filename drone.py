@@ -4,7 +4,16 @@ import time
 import asyncio
 import numpy as np
 
+
+async def await_airsim_future(future):
+    while not future.is_done():
+        await asyncio.sleep(0)  # Yield control to allow other asyncio tasks to run
+    return future.result()
+
+
 class Drone:
+
+
     client = airsim.MultirotorClient()
     def __init__(self, x, y, z, DroneName = ""):
         self.client.enableApiControl(True, DroneName)
@@ -21,30 +30,23 @@ class Drone:
         self.y = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.y_val
         self.z = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.z_val
         print("Current location: (%f, %f, %f)" % (self.x, self.z, -self.y))
-    async def move(self, x, y, z,velocity,delay = 0):
-        try:
-            x = float(x)
-            y = float(y)
-            z = float(z)
-            velocity = float(velocity)
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-            return
-        await asyncio.sleep(delay)
-        x = float(x)
-        y = float(y)
-        z = float(z)
 
-        self.client.moveToPositionAsync(x, z, -y, velocity,vehicle_name=self.name)
-        #using self.client.simGetGroundTruthKinematics().position to get current location and cancellast task, check when drone is within 1m of target location
+    async def move(self, x, y, z, velocity, delay=0):
+        # Convert to float in case inputs are not in the correct format
+        x, y, z = float(x), float(y), float(z)
+        # Start moving to the position without waiting for it to complete
+        move_future = self.client.moveToPositionAsync(x, z, -y, velocity, vehicle_name=self.name)
+
         while True:
-            x_loc = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.x_val
-            y_loc = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.y_val
-            z_loc = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.z_val
-            location = np.array([x_loc, y_loc, z_loc])
+            await asyncio.sleep(0.1)  # Non-blocking wait before checking the distance
+            position = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position
+            location = np.array([position.x_val, position.y_val, position.z_val])
             target = np.array([x, y, z])
             distance = np.linalg.norm(location - target)
-            if distance < 1:
+            print("Distance to target: ", distance)
+
+            if distance < 100:  # If within 1 meter of the target, cancel the task
+                print("Target within 1 meter, canceling task.")
                 self.client.cancelLastTask(vehicle_name=self.name)
                 break
 

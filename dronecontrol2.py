@@ -44,7 +44,7 @@ async def main():
             drone_tasks[drone1.name] = asyncio.create_task(run_commands(drone1, commands))
             drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
             drone_tasks[drone3.name] = asyncio.create_task(run_commands(drone3, commands))
-            drone_tasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
+            drone_tmovasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
             drone_tasks[drone5.name] = asyncio.create_task(run_commands(drone5, commands))
             await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name],drone_tasks[drone3.name],
                                  drone_tasks[drone4.name],drone_tasks[drone5.name])
