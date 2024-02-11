@@ -16,7 +16,7 @@ async def get_user_command(session,prompt):
 
 command_file = "C:/Users/aleca/Desktop/test2.json"
 commands = get_commands_list(command_file)
-print(commands)
+#print(commands)
 drone1 = Drone(0, 10, 0, "Drone1")
 drone2 = Drone(0, 10, 0, "Drone2")
 drone3 = Drone(0, 10, 0, "Drone3")
@@ -26,6 +26,7 @@ drone5 = Drone(0, 10, 0, "Drone5")
 
 async def run_commands(drone, commands):
     for step in commands[drone.name]:
+        print(step)
         await drone.move(step["x"], step["y"], step["z"], step["velocity"], step["delay"])
 
 
@@ -42,9 +43,10 @@ async def main():
 
         if user_command == "file":
             drone_tasks[drone1.name] = asyncio.create_task(run_commands(drone1, commands))
+            #await asyncio.gather(drone_tasks[drone1.name])
             drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
             drone_tasks[drone3.name] = asyncio.create_task(run_commands(drone3, commands))
-            drone_tmovasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
+            drone_tasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
             drone_tasks[drone5.name] = asyncio.create_task(run_commands(drone5, commands))
             await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name],drone_tasks[drone3.name],
                                  drone_tasks[drone4.name],drone_tasks[drone5.name])
@@ -59,6 +61,9 @@ async def main():
             y = float(await get_user_command(session,"Enter desired y-coordinate: "))
             z = float(await get_user_command(session,"Enter desired z-coordinate: "))
             velocity = float(await get_user_command(session,"Enter desired velocity: "))
+            if velocity <= 0:
+                print("Velocity must be a positive number")
+                continue
             delay = float(await get_user_command(session,"Enter desired delay: "))
             drone_tasks[selected_drone.name] = asyncio.create_task(selected_drone.move(x, y, z, velocity, delay))
         await asyncio.sleep(0)  # Give time for other tasks to run

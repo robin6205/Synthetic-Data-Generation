@@ -24,34 +24,44 @@ class Drone:
         self.client.takeoffAsync(vehicle_name=DroneName)
         #self.client.moveToPositionAsync(self.x, self.z, -self.y, 5).join()
         self.name = DroneName
+        #get gps data
+        data = self.client.getGpsData(vehicle_name=DroneName)
+        print("GPS data: %s" % data)
+
 
     def update(self):
         self.x = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.x_val
-        self.y = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.y_val
-        self.z = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.z_val
-        print("Current location: (%f, %f, %f)" % (self.x, self.z, -self.y))
+        self.y = -1 * self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.z_val
+        self.z = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position.y_val
+        #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
 
     async def move(self, x, y, z, velocity, delay=0):
+
+        #adding rotation: we can either do it with absolute or relative degrees
+
+
         # Convert to float in case inputs are not in the correct format
         x, y, z = float(x), float(y), float(z)
         # Start moving to the position without waiting for it to complete
-        move_future = self.client.moveToPositionAsync(x, z, -y, velocity, vehicle_name=self.name)
-
+        await asyncio.sleep(delay)
+        #print("a")
+        self.client.moveToPositionAsync(x, z, -y, velocity, vehicle_name=self.name)
         while True:
-            await asyncio.sleep(0.1)  # Non-blocking wait before checking the distance
-            position = self.client.simGetGroundTruthKinematics(vehicle_name=self.name).position
-            location = np.array([position.x_val, position.y_val, position.z_val])
+            await asyncio.sleep(0)
+            self.update()
+            location = np.array([self.x, self.y, self.z])
             target = np.array([x, y, z])
             distance = np.linalg.norm(location - target)
-            print("Distance to target: ", distance)
-
-            if distance < 100:  # If within 1 meter of the target, cancel the task
-                print("Target within 1 meter, canceling task.")
+            #print("Distance to target: ", distance)
+            #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
+            if distance < 6:  # If within 6 meters of the target, cancel the task
+                print("Drone %s has reached the target" % self.name)
                 self.client.cancelLastTask(vehicle_name=self.name)
                 break
 
 
         self.update()
+
     def orbit(self,x,y,z,radius,orbits):
         try:
             x = float(x)
