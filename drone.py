@@ -36,6 +36,10 @@ class Drone:
         #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
 
     async def move(self, x, y, z, velocity, delay=0):
+        #use sigmoid to calculate distance bound
+        threshhold = 8 * (1 / (1 + np.exp(-1 * velocity)))  # 6 is the distance to target
+
+
 
         #adding rotation: we can either do it with absolute or relative degrees
 
@@ -45,7 +49,7 @@ class Drone:
         # Start moving to the position without waiting for it to complete
         await asyncio.sleep(delay)
         #print("a")
-        self.client.moveToPositionAsync(x, z, -y, velocity, vehicle_name=self.name)
+        self.client.moveToPositionAsync(x, z, -y, velocity, vehicle_name=self.name,drivetrain = 1, yaw_mode= airsim.YawMode(False,0))
         while True:
             await asyncio.sleep(0)
             self.update()
@@ -54,8 +58,8 @@ class Drone:
             distance = np.linalg.norm(location - target)
             #print("Distance to target: ", distance)
             #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
-            if distance < 6:  # If within 6 meters of the target, cancel the task
-                print("Drone %s has reached the target" % self.name)
+            if distance < threshhold:  # If within 6 meters of the target, cancel the task
+                print("Drone %s has reached within %f meters of the target" % (self.name, threshhold))
                 self.client.cancelLastTask(vehicle_name=self.name)
                 break
 
