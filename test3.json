@@ -1,0 +1,58 @@
+{
+    "Drone1" :[
+        {    
+            "step":1,
+            "x": 30,
+            "y": 30,
+            "z": 30,
+            "velocity":20,
+            "heading":1,
+            "delay":0
+        },
+        {    
+            "step":2,
+            "x": 30,
+            "y": 0,
+            "z": 30,
+            "velocity":10,
+            "heading":1,
+            "delay":0
+        },
+        {    
+            "step":3,
+            "x": 50,
+            "y": 1,
+            "z": 50,
+            "velocity":10,
+            "heading":1,
+            "delay":0
+        },
+{    
+            "step":4,
+            "x": 60,
+            "y": 30,
+            "z": 10,
+            "velocity":20,
+            "heading":1,
+            "delay":0
+        },
+        {    
+            "step":5,
+            "x": 23,
+            "y": 15,
+            "z": 45,
+            "velocity":10,
+            "heading":1,
+            "delay":0
+        },
+        {    
+            "step":6,
+            "x": 12,
+            "y": 1,
+            "z": 30,
+            "velocity":10,
+            "heading":1,
+            "delay":0
+        }
+    ]
+}

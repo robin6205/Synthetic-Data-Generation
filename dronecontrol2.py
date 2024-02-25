@@ -36,7 +36,7 @@ async def main():
     session = PromptSession()
 
     while True:
-        user_command = await get_user_command(session,"Enter command (move, file, quit): ")
+        user_command = await get_user_command(session,"Enter command (move, movegps, file, quit): ")
 
         if user_command == "quit":
             break
@@ -55,7 +55,7 @@ async def main():
             drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
             selected_drone = drone_dict[user_input]
             if drone_tasks[selected_drone.name] and not drone_tasks[selected_drone.name].done():
-                print(f"{selected_drone.name} is still executing a task. Please wait for it to finish.")
+                print(f"{selected_drone.name} is still executing a task. Please wait for it  o finish.")
                 continue
             x = float(await get_user_command(session,"Enter desired x-coordinate: "))
             y = float(await get_user_command(session,"Enter desired y-coordinate: "))
@@ -66,6 +66,24 @@ async def main():
                 continue
             delay = float(await get_user_command(session,"Enter desired delay: "))
             drone_tasks[selected_drone.name] = asyncio.create_task(selected_drone.move(x, y, z, velocity, delay))
+
+
+        if user_command == "movegps":
+            user_input = await get_user_command(session,"Select a drone (1 or 2 or 3 or 4 or 5): ")
+            drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
+            selected_drone = drone_dict[user_input]
+            if drone_tasks[selected_drone.name] and not drone_tasks[selected_drone.name].done():
+                print(f"{selected_drone.name} is still executing a task. Please wait for it to finish.")
+                continue
+            latitude = float(await get_user_command(session,"Enter latitude: "))
+            longitude = float(await get_user_command(session,"Enter longitude: "))
+            altitude = float(await get_user_command(session,"Enter altitude: "))
+            velocity = float(await get_user_command(session,"Enter desired velocity: "))
+            if velocity <= 0:
+                print("Velocity must be a positive number")
+                continue
+            delay = float(await get_user_command(session,"Enter desired delay: "))
+            drone_tasks[selected_drone.name] = asyncio.create_task(selected_drone.movegps(latitude, longitude, altitude, velocity, delay))
         await asyncio.sleep(0)  # Give time for other tasks to run
 
 

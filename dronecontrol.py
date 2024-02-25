@@ -17,9 +17,9 @@ print(commands)
 
 drone_one = drone.Drone(client, 0, 10, 0)
 
-for step in commands["Drone1"]:
-    time.sleep(step["delay"])
-    drone_one.move(step["x"], step["y"], step["z"], step["velocity"])
+#for step in commands["Drone1"]:
+    #time.sleep(step["delay"])
+    #drone_one.move(step["x"], step["y"], step["z"], step["velocity"])
 
 
 
