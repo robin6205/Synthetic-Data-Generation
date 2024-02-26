@@ -56,26 +56,31 @@ with open(output_file, 'w') as fid_out:
     links = [a['href'] for a in soup.find_all('a', href=True) if a.text.endswith('.gz')]
 
     # Process each file
-    for link in links:
-        if is_within_time_bounds(link, start_dt, end_dt):
-            data = download_and_extract(currurl + link)
-            if data:
-                # Filter only specific fields in aircraft data
-                print('Filtering data...')
-                filtered_aircraft = [
-                    {
-                        'hex': ac.get('hex'),
-                        'flight': ac.get('flight'),
-                        'alt_baro': ac.get('alt_baro'),
-                        #'alt_geom': ac.get('alt_geom'),
-                        #'gs': ac.get('gs'),
-                        #'track': ac.get('track'),
-                        #'baro_rate': ac.get('baro_rate'),
-                        'lat': ac.get('lat'),
-                        'lon': ac.get('lon'),
-                    } for ac in data.get('aircraft', []) if 'lat' in ac and 'lon' in ac and is_within_geobound(ac['lat'], ac['lon'], geobound)
-                ]
+    first_item = True
 
-                if filtered_aircraft:
-                    data['aircraft'] = filtered_aircraft
-                    json.dump(data, fid_out, indent=4)
+    with open(output_file, 'w') as fid_out:
+        fid_out.write('[')  # Start of JSON array
+
+        for link in links:
+            if is_within_time_bounds(link, start_dt, end_dt):
+                data = download_and_extract(currurl + link)
+                if data:
+                    print('Filtering data...')
+                    filtered_aircraft = [
+                        {
+                            'hex': ac.get('hex'),
+                            'flight': ac.get('flight'),
+                            'alt_baro': ac.get('alt_baro'),
+                            'lat': ac.get('lat'),
+                            'lon': ac.get('lon'),
+                        } for ac in data.get('aircraft', []) if
+                        'lat' in ac and 'lon' in ac and is_within_geobound(ac['lat'], ac['lon'], geobound)
+                    ]
+
+                    if filtered_aircraft:
+                        data['aircraft'] = filtered_aircraft
+                        if first_item:
+                            first_item = False
+                        else:
+                            fid_out.write(',')  # Add comma before the next object if it's not the first one
+                        json.dump(data, fid_out, indent=4)
