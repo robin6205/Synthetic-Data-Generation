@@ -16,11 +16,8 @@ class Drone:
 
     client = airsim.MultirotorClient()
     def __init__(self, x, y, z, DroneName = ""):
-        #print("asd")
         self.client.enableApiControl(True, DroneName)
-        #print("asd")
         self.client.armDisarm(True, DroneName)
-        #print("asd")
         self.x = x
         self.y = y
         self.z = z
@@ -70,7 +67,7 @@ class Drone:
 
         self.update()
 
-    async def movegps(self, longitude, latitude, altitude, velocity, delay=0):
+    async def movegps(self, latitude, longitude, altitude, velocity, delay=0):
         #use sigmoid to calculate distance bound
         #print("ASKDHJASKLDJHASDJKL")
         #threshhold = 8 * (1 / (1 + np.exp(-1 * velocity)))  # 6 is the distance to target
@@ -85,7 +82,10 @@ class Drone:
         # Start moving to the position without waiting for it to complete
         #await asyncio.sleep(delay)
         #print("a")
-        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity).join()
+        print(latitude)
+        print(longitude)
+        print(altitude)
+        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0)).join()
         '''while True:
             await asyncio.sleep(0)
             self.update()
