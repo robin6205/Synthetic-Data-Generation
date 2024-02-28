@@ -14,7 +14,7 @@ async def get_user_command(session,prompt):
 
 
 
-command_file = "C:/Users/aleca/Desktop/test2.json"
+command_file = "C:/Users/LocalUser/Desktop/20230801-130000_200000.json" #CHANGE TO COMMAND FILE LOCATION
 commands = get_commands_list(command_file)
 #print(commands)
 drone1 = Drone(0, 10, 0, "Drone1")
@@ -26,8 +26,13 @@ drone5 = Drone(0, 10, 0, "Drone5")
 
 async def run_commands(drone, commands):
     for step in commands[drone.name]:
-        print(step)
+        #print(step)
+        time.sleep(.5)
         await drone.move(step["x"], step["y"], step["z"], step["velocity"], step["delay"])
+async def run_commands_test(drone,commands):
+    for step in commands["a8956e"]:
+        print(step)
+        await drone.movegps(step[0],step[1],step[2],20,0)
 
 
 async def main():
@@ -42,14 +47,14 @@ async def main():
             break
 
         if user_command == "file":
-            drone_tasks[drone1.name] = asyncio.create_task(run_commands(drone1, commands))
-            #await asyncio.gather(drone_tasks[drone1.name])
-            drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
+            drone_tasks[drone1.name] = asyncio.create_task(run_commands_test(drone1, commands))
+            await asyncio.gather(drone_tasks[drone1.name])
+            '''drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
             drone_tasks[drone3.name] = asyncio.create_task(run_commands(drone3, commands))
             drone_tasks[drone4.name] = asyncio.create_task(run_commands(drone4, commands))
             drone_tasks[drone5.name] = asyncio.create_task(run_commands(drone5, commands))
             await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name],drone_tasks[drone3.name],
-                                 drone_tasks[drone4.name],drone_tasks[drone5.name])
+                                 drone_tasks[drone4.name],drone_tasks[drone5.name])'''
         if user_command == "move":
             user_input = await get_user_command(session,"Select a drone (1 or 2 or 3 or 4 or 5): ")
             drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}

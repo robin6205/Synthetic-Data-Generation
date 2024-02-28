@@ -3,6 +3,8 @@ import airsim
 import time
 import asyncio
 import numpy as np
+from geopy import distance
+import math
 
 
 async def await_airsim_future(future):
@@ -40,11 +42,6 @@ class Drone:
         #use sigmoid to calculate distance bound
         threshhold = 8 * (1 / (1 + np.exp(-1 * velocity)))  # 6 is the distance to target
 
-
-
-        #adding rotation: we can either do it with absolute or relative degrees
-
-
         # Convert to float in case inputs are not in the correct format
         x, y, z = float(x), float(y), float(z)
         # Start moving to the position without waiting for it to complete
@@ -69,16 +66,7 @@ class Drone:
 
     async def movegps(self, latitude, longitude, altitude, velocity, delay=0):
         #use sigmoid to calculate distance bound
-        #print("ASKDHJASKLDJHASDJKL")
-        #threshhold = 8 * (1 / (1 + np.exp(-1 * velocity)))  # 6 is the distance to target
-
-
-
-        #adding rotation: we can either do it with absolute or relative degrees
-
-
-        # Convert to float in case inputs are not in the correct format
-        #x, y, z = float(x), float(y), float(z)
+        threshhold = 5  # 6 is the distance to target
         # Start moving to the position without waiting for it to complete
         #await asyncio.sleep(delay)
         #print("a")
@@ -86,18 +74,20 @@ class Drone:
         print(longitude)
         print(altitude)
         self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0))
-        '''while True:
+        await asyncio.sleep(0)
+        while True:
             await asyncio.sleep(0)
             self.update()
-            location = np.array([self.x, self.y, self.z])
-            target = np.array([x, y, z])
-            distance = np.linalg.norm(location - target)
+            current_location = self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.latitude,self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.longitude
+            distance_2d = distance.distance((current_location),(latitude,longitude)).km
+            euclidian_distance = (math.sqrt(distance_2d ** 2 + (altitude - self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.altitude) ** 2))
+            print(euclidian_distance)
             #print("Distance to target: ", distance)
             #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
-            if distance < threshhold:  # If within 6 meters of the target, cancel the task
+            if euclidian_distance < threshhold:  # If within 6 meters of the target, cancel the task
                 print("Drone %s has reached within %f meters of the target" % (self.name, threshhold))
                 self.client.cancelLastTask(vehicle_name=self.name)
-                break'''
+                break
 
 
         #self.update()
