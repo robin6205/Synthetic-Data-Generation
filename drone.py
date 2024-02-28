@@ -85,7 +85,7 @@ class Drone:
         print(latitude)
         print(longitude)
         print(altitude)
-        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0)).join()
+        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0))
         '''while True:
             await asyncio.sleep(0)
             self.update()
