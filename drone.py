@@ -66,21 +66,22 @@ class Drone:
 
     async def movegps(self, latitude, longitude, altitude, velocity, delay=0):
         #use sigmoid to calculate distance bound
-        threshhold = 5  # 6 is the distance to target
+        threshhold = 1  # 6 is the distance to target
         # Start moving to the position without waiting for it to complete
         #await asyncio.sleep(delay)
         #print("a")
         print(latitude)
         print(longitude)
         print(altitude)
-        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0))
+        self.client.moveToGPSAsync(latitude, longitude, altitude, velocity,drivetrain = 1, yaw_mode= airsim.YawMode(False,0)).join()
         await asyncio.sleep(0)
-        while True:
+        '''while True:
             await asyncio.sleep(0)
             self.update()
             current_location = self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.latitude,self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.longitude
             distance_2d = distance.distance((current_location),(latitude,longitude)).km
-            euclidian_distance = (math.sqrt(distance_2d ** 2 + (altitude - self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.altitude) ** 2))
+            euclidian_distance = (math.sqrt((distance_2d** 2) + ((altitude - self.client.getGpsData(vehicle_name=self.name).gnss.geo_point.altitude)** 2)))
+            euclidian_distance = abs(euclidian_distance)
             print(euclidian_distance)
             #print("Distance to target: ", distance)
             #print("Current location: (%f, %f, %f)" % (self.x, self.y, self.z))
@@ -88,7 +89,7 @@ class Drone:
                 print("Drone %s has reached within %f meters of the target" % (self.name, threshhold))
                 self.client.cancelLastTask(vehicle_name=self.name)
                 break
-
+        '''
 
         #self.update()
 

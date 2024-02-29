@@ -14,8 +14,9 @@ async def get_user_command(session,prompt):
 
 
 
-command_file = "C:/Users/LocalUser/Desktop/20230801-130000_200000.json" #CHANGE TO COMMAND FILE LOCATION
-commands = get_commands_list(command_file)
+#command_file = "C:/Users/LocalUser/Desktop/20230801-130000_200000.json" #CHANGE TO COMMAND FILE LOCATION
+#commands = get_commands_list(command_file)
+commands = {"test1":[(40.41580,-86.92763,100),(40.41565,-86.92513,100),(40.41477024709311, -86.93331139622599,20)]}
 #print(commands)
 drone1 = Drone(0, 10, 0, "Drone1")
 drone2 = Drone(0, 10, 0, "Drone2")
@@ -33,6 +34,10 @@ async def run_commands_test(drone,commands):
     for step in commands["a8956e"]:
         print(step)
         await drone.movegps(step[0],step[1],step[2],20,0)
+async def run_commands_test2(drone,commands):
+    for step in commands["test1"]:
+        print(step)
+        await drone.movegps(step[0],step[1],step[2],17,0)
 
 
 async def main():
@@ -47,7 +52,7 @@ async def main():
             break
 
         if user_command == "file":
-            drone_tasks[drone1.name] = asyncio.create_task(run_commands_test(drone1, commands))
+            drone_tasks[drone1.name] = asyncio.create_task(run_commands_test2(drone1, commands))
             await asyncio.gather(drone_tasks[drone1.name])
             '''drone_tasks[drone2.name] = asyncio.create_task(run_commands(drone2, commands))
             drone_tasks[drone3.name] = asyncio.create_task(run_commands(drone3, commands))
