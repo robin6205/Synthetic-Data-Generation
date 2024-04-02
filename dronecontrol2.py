@@ -13,18 +13,20 @@ async def get_user_command(session,prompt):
 
 
 
-
+#getting data from file or creating test data
 #command_file = "C:/Users/LocalUser/Desktop/20230801-130000_200000.json" #CHANGE TO COMMAND FILE LOCATION
 #commands = get_commands_list(command_file)
 commands = {"test1":[(40.41580,-86.92763,100),(40.41565,-86.92513,100),(40.41477024709311, -86.93331139622599,20)]}
 #print(commands)
+
+#initialize drones
 drone1 = Drone(0, 10, 0, "Drone1")
 drone2 = Drone(0, 10, 0, "Drone2")
 drone3 = Drone(0, 10, 0, "Drone3")
 drone4 = Drone(0, 10, 0, "Drone4")
 drone5 = Drone(0, 10, 0, "Drone5")
 
-
+#run commands from file
 async def run_commands(drone, commands):
     for step in commands[drone.name]:
         #print(step)
@@ -41,10 +43,11 @@ async def run_commands_test2(drone,commands):
 
 
 async def main():
+    #initialize drone tasks
     drone_tasks = {drone1.name: None, drone2.name: None,drone3.name: None, drone4.name: None,drone5.name: None}
     drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
     session = PromptSession()
-
+    #prompt user for command
     while True:
         user_command = await get_user_command(session,"Enter command (move, movegps, file, quit): ")
 
@@ -60,6 +63,7 @@ async def main():
             drone_tasks[drone5.name] = asyncio.create_task(run_commands(drone5, commands))
             await asyncio.gather(drone_tasks[drone1.name], drone_tasks[drone2.name],drone_tasks[drone3.name],
                                  drone_tasks[drone4.name],drone_tasks[drone5.name])'''
+        #deprecated move command used in blocks environment
         if user_command == "move":
             user_input = await get_user_command(session,"Select a drone (1 or 2 or 3 or 4 or 5): ")
             drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
@@ -77,7 +81,7 @@ async def main():
             delay = float(await get_user_command(session,"Enter desired delay: "))
             drone_tasks[selected_drone.name] = asyncio.create_task(selected_drone.move(x, y, z, velocity, delay))
 
-
+        #gps movement commands
         if user_command == "movegps":
             user_input = await get_user_command(session,"Select a drone (1 or 2 or 3 or 4 or 5): ")
             drone_dict = {"1": drone1, "2": drone2, "3": drone3, "4": drone4, "5": drone5}
@@ -104,23 +108,3 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-
-'''while True:
-    #print current location to console
-    print(client.simGetGroundTruthKinematics().position)
-    #ask user for command: move, orbit, or exit
-    command = input("Enter command: ")
-    if command == "move":
-        x = input("Enter desired x-coordinate: ")
-        y = input("Enter desired y-coordinate: ")
-        z = input("Enter desired z-coordinate: ")
-        drone_one.move(x,y,z)
-    elif command == "orbit":
-        x = input("Enter desired x-coordinate: ")
-        y = input("Enter desired y-coordinate: ")
-        z = input("Enter desired z-coordinate: ")
-        radius = input("Enter desired radius: ")
-        orbits = input("Enter desired number of orbits: ")
-        drone_one.orbit(x,y,z,radius,orbits)
-    elif command == "exit":
-        break'''
