@@ -2,23 +2,28 @@ import sys
 import os
 import settingsjsonactions
 import cmd
+#import dronecontrol2
 #location of settings file for each environment
-airsim_settings_path = "Path/To/Setting"
 airsim_settings = {}
 weather_settings = {}
+other_settings = {}
 unreal_environments = []
 current_environment = ""
 settings = {}
-master_settings_path = "C:/Users/aleca/OneDrive/Documents/GitHub/Synthetic-Data-Generation/settingsTest.json"
-import dronecontrol2
+master_settings_path = "./settingsTest.json"
+airsim_settings_path = "./settings.json"
+
 class DroneControl(cmd.Cmd):
     prompt = "Enter command (start/settings/quit) or help for list of commands: "
-    def __init__(self,settingsPath):
+    def __init__(self,settingsPath, airsimPath):
         super().__init__()
         self.settingsPath = settingsPath
+        self.airsimPath = airsimPath
         self.settings = {}
+        self. airsimSettings = {}
     def do_preloop(self):
         self.settings = settingsjsonactions.readSettings(self.settingsPath)
+        self.airsimSettings = settingsjsonactions.readSettings(self.airsimPath)
 
     def do_postloop(self):
         settingsjsonactions.writeSettings(self.settingsPath,self.settings)
@@ -28,8 +33,9 @@ class DroneControl(cmd.Cmd):
         #start simulation unreal
     def do_settings(self, arg):
         #call settings subprocess with settings
-        DroneSettings(self.settings).cmdloop()
-
+        settings_page = DroneSettings(self.settings)
+        settings_page.cmdloop()
+        settings_page.do_postloop()
     def do_quit(self, arg):
         return True
 
@@ -67,12 +73,23 @@ class DroneSettings(cmd.Cmd):
             else:
                 print(f"({x}) {categories[x]}: {self.settings[categories[x]]}")
 
+    def do_postloop(self):
+        for setting in self.settings.keys():
+            if setting == "Airsim":
+                settingsjsonactions.writeAirsimSettings(airsim_settings_path,self.settings[setting])
+            elif setting == "Weather":
+                pass
+            else:
+                pass
+
+
+
     def default(self, arg):
         print("Invalid command")
 
 
 if __name__ == "__main__":
-    drone_control = DroneControl(master_settings_path)
+    drone_control = DroneControl(master_settings_path,airsim_settings_path)
     drone_control.do_preloop()
     drone_control.cmdloop()
     drone_control.do_postloop()

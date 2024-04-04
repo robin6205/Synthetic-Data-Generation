@@ -10,7 +10,17 @@ def writeSettings(settingsPath, settings):
         json.dump(settings, settingsFile)
 
 
-file_path = "C:/Users/aleca/OneDrive/Documents/GitHub/Synthetic-Data-Generation/settingsTest.json"
+def writeAirsimSettings(settingsPath, settings):
+    airsim_file = readSettings(settingsPath)
+    if settings["num_drones"] != len(airsim_file["Vehicles"]):
+        airsim_file["Vehicles"] = {}
+        template = readSettings("px4_drone_template.json")
+        for i in range(int(settings["num_vehicles"])):
+            #append drone template to airsim settings file
+            airsim_file["Vehicles"]["Drone" + str(i)] = template
+    writeSettings(settingsPath, airsim_file)
+
+
 
 #settings = readSettings(file_path)
 #print(list(settings.keys()))
