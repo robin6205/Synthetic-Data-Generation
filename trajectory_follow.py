@@ -48,9 +48,13 @@ originalposition = client.simGetVehiclePose().position
 print("Taking off...")
 client.takeoffAsync().join()
 
+# fly up to 10 meter altitude
+print("Flying up...")
+client.moveToPositionAsync(originalposition.x_val, originalposition.y_val, originalposition.z_val-10, 5).join()
+
 # fly forward for 10 meters
-
-
+print("Flying forward...")
+client.moveToPositionAsync(x=-160, y=-15, z=originalposition.z_val-10, velocity=15).join()
 # print("Flying forward...to the first point")
 # client.moveToPositionAsync(-70, 0, -1, 5).join()
 # print("Flying forward... to the second point")
@@ -58,17 +62,17 @@ client.takeoffAsync().join()
  
  
 # fly up to 10 meter altitude 
-print("Flying up...")
-client.moveToPositionAsync(originalposition.x_val, originalposition.y_val, -15, 5).join()
+# print("Flying up...")
+# client.moveToPositionAsync(originalposition.x_val, originalposition.y_val, -15, 5).join()
 
-time.sleep(50)
+# time.sleep(50)
 
  
 
 
 # Ensure safe landing
-print("Landing...")
-client.landAsync().join()
+# print("Landing...")
+# client.landAsync().join()
 client.reset()
 # Disarm and reset API control
 client.armDisarm(False)
