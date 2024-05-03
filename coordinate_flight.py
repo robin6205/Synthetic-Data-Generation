@@ -2,77 +2,59 @@ import airsim
 import time
 import json
 
+import airsim
+
+# Main function to move drone based on GPS coordinates
+def move_drone_to_gps_location(latitude, longitude, altitude, velocity):
+    # Connect to the AirSim simulator as a MultirotorClient
+    client = airsim.MultirotorClient()
+    client.confirmConnection()
+    client.enableApiControl(True)
+    client.armDisarm(True)
+
+    # Take off and hover to ensure the drone is airborne
+    print("Taking off...")
+    client.takeoffAsync().join()
+    
+    # first fly up to 30 meters
+    # print("Flying up...")
+    # client.moveToPositionAsync(0, 0, -10, 5).join()
+
+    print(f"Moving to GPS location: Latitude={latitude}, Longitude={longitude}, Altitude={altitude} at {velocity} m/s")
+    
+    #get current gps altitude
+    gps = client.getGpsData()
+    print("Current GPS altitude: ", gps)
+    
+    # Move to the specified GPS location
+    client.moveToGPSAsync(latitude = latitude, longitude = longitude, altitude = altitude, velocity = velocity).join()
+
+    # Ensure safe landing after reaching the destination
+    print("Landing...")
+    client.landAsync().join()
+
+    # Cleanup by disarming and releasing API control
+    client.armDisarm(False)
+    client.enableApiControl(False)
+
+# Specify the GPS coordinates you want the drone to navigate to
+# latitude = 40.41356425186632
+# longitude = -86.93421822607813
+latitude = 40.41508599719736
+longitude = -86.93484426930432
+
+#print current altitude and set the altitude
+# set to current altitude + 10 meters
+altitude = 200
+velocity = 5  # Desired velocity in meters per second
 
 
-# Function to read waypoints from the JSON file
-def read_waypoints(filename):
-    with open(filename, 'r') as file:
-        data = json.load(file)
-    return data["Trajectory"]["Blocks_env"]
+# client = airsim.MultirotorClient()
+# client.confirmConnection()
+# client.enableApiControl(True)
+# print("Arming the drone...")
+# client.armDisarm(True)
 
 
-
-def navigate(client, waypoints):
-    # Navigate through waypoints
-    for point in waypoints:
-        x, y, z = point["X"], point["Y"], point["Z"]
-        heading = point["Heading"]
-        # speed = point["Speed"]]
-        speed = point["Speed"]
-        print(f"Moving to (X: {y}, Y: {x}, Z: {z}) at speed {speed} m/s")
-        client.moveToPositionAsync(y, x, z, speed).join()
-        # Optional: Adjust the drone's heading
-        # client.rotateToYawAsync(heading).join()
-
-#print current position
-# position = client.simGetVehiclePose().position
-# print("Current position: ", position)
-# Connect to the AirSim simulator 
-client = airsim.MultirotorClient()
-client.confirmConnection()
-client.enableApiControl(True)
-
-# Read waypoints from the JSON file
-# waypoints = read_waypoints("airport_trajectory.json")
-
-# Navigate through waypoints
-# navigate(client, waypoints)
-# Arm the drone
-print("Arming the drone...")
-client.armDisarm(True)
-
-# get current position
-originalposition = client.simGetVehiclePose().position
-
-# Take off
-print("Taking off...")
-client.takeoffAsync().join()
-
-# fly up to 10 meter altitude
-print("Flying up...")
-client.moveToPositionAsync(originalposition.x_val, originalposition.y_val, originalposition.z_val-10, 5).join()
-
-# fly forward for 10 meters
-print("Flying forward...")
-client.moveToPositionAsync(x=-160, y=-15, z=originalposition.z_val-10, velocity=15).join()
-# print("Flying forward...to the first point")
-# client.moveToPositionAsync(-70, 0, -1, 5).join()
-# print("Flying forward... to the second point")
-# client.moveToPositionAsync(-200, 0, -40, 10).join()
- 
- 
-# fly up to 10 meter altitude 
-# print("Flying up...")
-# client.moveToPositionAsync(originalposition.x_val, originalposition.y_val, -15, 5).join()
-
-# time.sleep(50)
-
- 
-
-
-# Ensure safe landing
-# print("Landing...")
-# client.landAsync().join()
-client.reset()
-# Disarm and reset API control
-client.armDisarm(False)
+# Call the function with the specified GPS coordinates
+move_drone_to_gps_location(latitude, longitude, altitude, velocity)

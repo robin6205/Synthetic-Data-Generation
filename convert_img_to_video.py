@@ -4,7 +4,8 @@ import glob
 
 def create_video_from_images(images, output_video_file, fps=24):
     # Ensure the images are in the correct order
-    images.sort(key=lambda x: int(x.split('\\')[-1].split('_')[1]))
+    # images.sort(key=lambda x: int(x.split('\\')[-1].split('_')[1]))
+    images.sort(key=lambda x: int(x.split('\\')[-1].split('_')[0]))
     
     # Use the first image to get the video dimensions
     frame = cv2.imread(images[0])
@@ -23,17 +24,19 @@ def create_video_from_images(images, output_video_file, fps=24):
     out.release()
     cv2.destroyAllWindows()
 
-def filter_and_create_videos_for_cameras(image_folder, fps=30):
+def filter_and_create_videos_for_cameras(image_folder, fps=10):
     # Gather all image filenames
     all_images = glob.glob(os.path.join(image_folder, '*.png'))
     
     # Filter images for each camera
+    cam0_images = [img for img in all_images]
     cam1_images = [img for img in all_images if 'cam1_' in img]
     cam2_images = [img for img in all_images if 'cam2_' in img]
     cam3_images = [img for img in all_images if 'cam3_' in img]
     cam4_images = [img for img in all_images if 'cam4_' in img]
     
     # Output file names
+    cam0_output_video_file = os.path.join(image_folder, 'cam0output.mp4')
     cam1_output_video_file = os.path.join(image_folder, 'cam1output.mp4')
     cam2_output_video_file = os.path.join(image_folder, 'cam2output.mp4')
     cam3_output_video_file = os.path.join(image_folder, 'cam3output.mp4')
@@ -66,9 +69,13 @@ def filter_and_create_videos_for_cameras(image_folder, fps=30):
         create_video_from_images(cam4_images, cam4_output_video_file, fps)
     else:
         print("No images found for cam4.")
+        
+    if cam0_images:
+        print("Creating video for cam0 images...")
+        create_video_from_images(cam0_images, cam0_output_video_file, fps)
 
 # Specify the folder where your images are
-image_folder = 'D:\\Unreal Projects\\camera_setup_env\\Saved\\UnrealGT\\UEDPIE_0_Purdue_airport3_4\\20240402T003243805Z\\GTFileStreamer'
+image_folder = 'D:\\Unreal Projects\\camera_setup_env\\Saved\\UnrealGT\\UEDPIE_0_Purdue_airport4\\20240418T142658809Z\\GTFileStreamer'
 
 # Call the function
 filter_and_create_videos_for_cameras(image_folder)
