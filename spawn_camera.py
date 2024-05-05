@@ -43,32 +43,8 @@ def lat_long_to_local_xy(target_lat, target_long, origin_lat, origin_long, scale
 
 
 
-# Example: Placing an object at specific geographic coordinates
-# target_lat = 40.41575316846016  # Example target latitude
-# target_long = -86.93270235873419  # Example target longitude
 
-target_lat = 40.41479089531425
-target_long = -86.93332413438019
 
-target_x = 30530
-target_y = 11050
-
-# Reference origin in Unreal Engine (replace with your actual origin)
-origin_lat = 40.413000
-origin_long = -86.934000
-
-# Assume Unreal units match meters (scale=1)
-scale = 277.6
-
-# x, y = lat_long_to_local_xy(target_lat, target_long, origin_lat, origin_long, scale)
-# # error in x and y
-# x_error = x - target_x
-# y_error = y - target_y
-#print error
-# print(f"Error in X, Y coordinates: {x_error}, {y_error}")
-# print('-----------------------------------')
-# print(f"Calculated X, Y coordinates: {x}, {y}")
-# print(f"Target X, Y coordinates: {target_x}, {target_y}")
 
 def lat_long_to_local_xy_rotated(target_lat, target_long, origin_lat, origin_long, scale=1):
     """
@@ -102,6 +78,23 @@ def lat_long_to_local_xy_rotated(target_lat, target_long, origin_lat, origin_lon
     
     return x, y
 
+
+# Example: Placing an object at specific geographic coordinates
+# target_lat = 40.41575316846016  # jayanth algo target location
+# target_long = -86.93270235873419  # 
+
+target_lat = 40.414782578455885
+target_long = -86.93324317088863
+
+target_x = 30530
+target_y = 11050
+
+# Reference origin in Unreal Engine (replace with your actual origin)
+origin_lat = 40.413000
+origin_long = -86.934000
+
+# Assume Unreal units match meters (scale=1)
+scale = 277.6
 # Now let's use the adjusted function with the scale that you found
 scale = 100.5
 
@@ -143,14 +136,19 @@ asset_name = "Recording_camera5"
 # Desired name for the new object instance
 # object_name = "SimpleCubeInstance"
 object_name = "RecordingCamera5Instance"
-z_offset = -40
+z_offset = -65  # Offset in centimeters to place the object above the ground
+
+z_adjusted = 1000 + z_offset  # Adjusted z coordinate for Unreal units
+
+yaw = math.radians(90)
+
 # Coordinates and orientation for where you want to spawn the object
-x, y, z = x_rot/100, y_rot/100, z_offset/100  # Example coordinates
+x, y, z = x_rot/100, y_rot/100, z_adjusted/100  # Example coordinates
 # x, y, z = 13204/100, 28285/100, 0.0  # Example coordinates
 # Spawn the blueprint object at the specified pose and scale
 spawned_object_name = client.simSpawnObject(object_name=object_name, 
                                             asset_name=asset_name, 
-                                            pose=airsim.Pose(airsim.Vector3r(x, y, -z), airsim.to_quaternion(0, 0, 0)), 
+                                            pose=airsim.Pose(airsim.Vector3r(x, y, -z), airsim.to_quaternion(0, 0, yaw)), 
                                             scale=airsim.Vector3r(1, 1, 1),
                                             is_blueprint=True)  # Indicate that this is a blueprint
 
@@ -158,3 +156,32 @@ if spawned_object_name:
     print(f"Successfully spawned '{spawned_object_name}' at the specified location.")
 else:
     print("Failed to spawn the object. Please check the asset name and parameters.")
+    
+def create_vehicle(location, rotation, vehicle_name):
+    # Create a vehicle at the specified location and rotation using simAddVehicle
+    #Add new vehicle via RPC
+
+    """
+    Create vehicle at runtime
+    simAddVehicle(self, vehicle_name, vehicle_type, pose, pawn_path = ""):
+    Args:
+        vehicle_name (str): Name of the vehicle being created
+        vehicle_type (str): Type of vehicle, e.g. "simpleflight"
+        pose (Pose): Initial pose of the vehicle
+        pawn_path (str, optional): Vehicle blueprint path, default empty wbich uses the default blueprint for the vehicle type
+
+    Returns:
+        bool: Whether vehicle was created
+    """
+    client.simAddVehicle(vehicle_name, 'SimpleFlight', airsim.Pose(location, airsim.to_quaternion(0, 0, 0)), '')
+
+
+    
+
+vehicle_location_lat = 40.41431673902852
+vehicle_location_long = -86.93362221272005
+vehicle_yaw = math.radians(45)
+vehicle_x, vehicle_y = lat_long_to_local_xy_rotated(vehicle_location_lat, vehicle_location_long, origin_lat, origin_long, scale)
+vehicle_location = airsim.Vector3r(vehicle_x/100, vehicle_y/100, -z_offset/100)
+
+create_vehicle(vehicle_name='drone2', location=vehicle_location, rotation=airsim.to_quaternion(0, 0, vehicle_yaw))
