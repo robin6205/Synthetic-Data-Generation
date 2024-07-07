@@ -2,7 +2,7 @@ import cv2
 import os
 import glob
 
-def create_video_from_images(images, output_video_file, fps=24):
+def create_video_from_images(images, output_video_file, fps=40):
     # Ensure the images are in the correct order
     # images.sort(key=lambda x: int(x.split('\\')[-1].split('_')[1]))
     images.sort(key=lambda x: int(x.split('\\')[-1].split('_')[0]))
@@ -24,7 +24,7 @@ def create_video_from_images(images, output_video_file, fps=24):
     out.release()
     cv2.destroyAllWindows()
 
-def filter_and_create_videos_for_cameras(image_folder, fps=10):
+def filter_and_create_videos_for_cameras(image_folder, fps=40):
     # Gather all image filenames
     all_images = glob.glob(os.path.join(image_folder, '*.png'))
     
@@ -75,7 +75,7 @@ def filter_and_create_videos_for_cameras(image_folder, fps=10):
         create_video_from_images(cam0_images, cam0_output_video_file, fps)
 
 # Specify the folder where your images are
-image_folder = 'D:\\Unreal Projects\\camera_setup_env\\Saved\\UnrealGT\\UEDPIE_0_Purdue_airport4\\20240418T142658809Z\\GTFileStreamer'
-
+image_folder = 'D:\\Unreal Projects\\camera_setup_env\\Saved\\UnrealGT\\UEDPIE_0_Purdue_airport_with_foliage\\20240704T015253243Z\\ImageStream'
+fps = 30
 # Call the function
-filter_and_create_videos_for_cameras(image_folder)
+filter_and_create_videos_for_cameras(image_folder, fps)
