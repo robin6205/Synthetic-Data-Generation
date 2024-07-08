@@ -17,6 +17,7 @@ def imread8(im_file):
     return im
 
 def read_png(res):
+    print('reading png')
     img = Image.open(io.BytesIO(res))
     return np.asarray(img)
 
@@ -46,28 +47,50 @@ try:
     if not client.isconnected():
         print('UnrealCV server is not running. Run the game downloaded from http://unrealcv.github.io first.')
         sys.exit(-1)
-
+    # Spawn a new camera
+    client.request('vset /objects/spawn FusionCameraActor Cam1')
+    # The actual id counts up from 1
+    time.sleep(1)  # Give some time for the camera to be spawned
     # Set camera location and orientation
-    location_command = 'vset /camera/CameraActor_1/location 0 0 0'
-    rotation_command = 'vset /camera/CameraActor_1/rotation 0 0 20.000000'
+    location_command = 'vset /camera/1/location 0 0 100'
+    rotation_command = 'vset /camera/1/rotation 0 250 0.000000'
     client.request(location_command)
     client.request(rotation_command)
     
     # Get status
     res = client.request('vget /unrealcv/status')
     print(res)
-
+    
+    # get uclass name vget /object/[obj_name]/uclass_name
+    res = client.request('vget /object/1/uclass_name')
+    print(res)
+    
     # Get image
-    # Get status
-    res = client.request('vget /unrealcv/status')
-    print('Status:', res)
-
-    # Get image
-    res = client.request('vget /camera/0/lit png')
+    res = client.request('vget /camera/1/lit png')
+    print(res)
     im = read_png(res)
     print('RGB image shape:', im.shape)
     # Get image
     save_image(res)
+  
+    # # Capture images for 30 seconds at 30 FPS
+    # fps = 30
+    # duration = 30
+    # start_time = time.time()
+
+    # while time.time() - start_time < duration:
+    #     res = client.request('vget /camera/0/lit png')
+        
+    #     if isinstance(res, str):
+    #         print('Received string response instead of bytes:', res)
+    #     else:
+    #         save_image(res)
+        
+    #     time.sleep(1 / fps)
+
+    # Get image
+    # Get status
+ 
 
     # # Get normals
     # res = client.request('vget /camera/0/normal png')
@@ -82,9 +105,9 @@ try:
 
 
     # Visualize the image we just captured
-    plt.imshow(im)
-    plt.axis('off')  # Hide axes
-    plt.show()
+    # plt.imshow(im)
+    # plt.axis('off')  # Hide axes
+    # plt.show()
     
     # res = client.request('vget /camera/0/object_mask png')
     # object_mask = read_png(res)
