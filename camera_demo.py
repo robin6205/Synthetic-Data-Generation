@@ -37,6 +37,14 @@ def save_image(image_data, folder='data'):
     img = Image.open(io.BytesIO(image_data))
     img.save(filename)
     print(f'Saved {filename}')
+    
+def normalize_depth(depth, clip_min=0, clip_max=500):
+    # Clip depth values to avoid extreme outliers
+    depth = np.clip(depth, clip_min, clip_max)
+    depth_min = np.min(depth)
+    depth_max = np.max(depth)
+    return (depth - depth_min) / (depth_max - depth_min)
+
 # Initialize client
 client = Client(('localhost', 9000))
 
@@ -67,26 +75,56 @@ try:
     
     # Get image
     res = client.request('vget /camera/1/lit png')
-    print(res)
     im = read_png(res)
     print('RGB image shape:', im.shape)
     # Get image
-    save_image(res)
-  
-    # # Capture images for 30 seconds at 30 FPS
-    # fps = 30
-    # duration = 30
-    # start_time = time.time()
+    
+    res = client.request('vget /camera/1/object_mask png')
+    object_mask = read_png(res)
+    # print(object_mask)
+    # plt.imshow(object_mask)
+    # plt.axis('off')  # Hide axes
+    # plt.show()
+    
+    # Get normals
+    # res = client.request('vget /camera/1/normal png')
+    # normal_img = read_png(res)
+    # print(normal_img)
+    # normalized_normal_img = normalize_normal_map(normal_img)
+    # plt.imshow(normalized_normal_img)
+    # plt.axis('off')  # Hide axes
+    # plt.show()
+    
+    # Get depth
+    res = client.request('vget /camera/1/depth npy')
+    depth = read_npy(res)
+    print(depth)
 
-    # while time.time() - start_time < duration:
-    #     res = client.request('vget /camera/0/lit png')
+    # Normalize depth values for visualization
+    normalized_depth = normalize_depth(depth, clip_min=0, clip_max=2000)
+
+    # Visualize the depth map
+    plt.imshow(normalized_depth, cmap='viridis')
+    plt.colorbar(label='Normalized Depth')
+    plt.axis('off')
+    plt.title('Depth Map')
+    plt.show()
+    
+    
+    # Capture images for 30 seconds at 30 FPS
+    fps = 30
+    duration = 30
+    start_time = time.time()
+
+    while time.time() - start_time < duration:
+        res = client.request('vget /camera/1/lit png')
         
-    #     if isinstance(res, str):
-    #         print('Received string response instead of bytes:', res)
-    #     else:
-    #         save_image(res)
+        if isinstance(res, str):
+            print('Received string response instead of bytes:', res)
+        else:
+            save_image(res)
         
-    #     time.sleep(1 / fps)
+        time.sleep(1 / fps)
 
     # Get image
     # Get status
